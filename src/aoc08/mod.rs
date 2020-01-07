@@ -113,4 +113,10 @@ mod test {
         let image = Image::new(input, 3, 2);
         assert_eq!(image.solve(), 6);
     }
+
+    #[test]
+    fn test_first() {
+        let input = include_str!("input");
+        assert_eq!(solve_first(input), 1560);
+    }
 }

@@ -226,15 +226,22 @@ mod test {
     use super::*;
 
     #[test]
-    fn test() {
-        assert_eq!(usize::max_value(), 18446744073709551615);
-    }
-
-    #[test]
     fn test_single_intcode() {
         let input = "109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99";
         let memory = read_codes(input);
         let output = single_intcode(memory.clone(), Vec::new());
         assert_eq!(memory, output);
+    }
+
+    #[test]
+    fn test_first() {
+        let input = include_str!("input");
+        assert_eq!(solve_first(input), 3507134798);
+    }
+
+    #[test]
+    fn test_second() {
+        let input = include_str!("input");
+        assert_eq!(solve_second(input), 84513);
     }
 }

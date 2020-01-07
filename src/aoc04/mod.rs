@@ -83,7 +83,7 @@ mod test {
     use super::*;
 
     #[test]
-    fn test_first() {
+    fn test_valid_first() {
         assert!(valid_number_first(111111));
         assert!(!valid_number_first(223450));
         assert!(!valid_number_first(123789));
@@ -91,9 +91,18 @@ mod test {
     }
 
     #[test]
-    fn test_second() {
+    fn test_valid_second() {
         assert!(valid_number_second(112233));
         assert!(!valid_number_second(123444));
         assert!(valid_number_second(111122));
+    }
+
+    #[test]
+    fn test_first() {
+        assert_eq!(solve_first(), 511);
+    }
+    #[test]
+    fn test_second() {
+        assert_eq!(solve_second(), 316);
     }
 }

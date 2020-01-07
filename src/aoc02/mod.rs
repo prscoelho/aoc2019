@@ -1,10 +1,6 @@
-fn read_codes() -> Vec<i32> {
-    let mut input = String::new();
+fn read_codes(input: &str) -> Vec<i32> {
     let mut result = Vec::new();
-    if std::io::stdin().read_line(&mut input).is_err() {
-        return result;
-    }
-    for number_str in input.split(',') {
+    for number_str in input.trim().split(',') {
         result.push(number_str.parse().unwrap())
     }
     result
@@ -42,13 +38,13 @@ pub fn naive_run(mut memory: Vec<i32>, noun: i32, verb: i32) -> i32 {
     memory[0]
 }
 
-pub fn solve_first() -> i32 {
-    let memory = read_codes();
+pub fn solve_first(input: &str) -> i32 {
+    let memory = read_codes(input);
     naive_run(memory, 12, 2)
 }
 
-pub fn solve_second() -> i32 {
-    let memory = read_codes();
+pub fn solve_second(input: &str) -> i32 {
+    let memory = read_codes(input);
     for noun in 0..memory.len() {
         for verb in 0..memory.len() {
             if naive_run(memory.clone(), noun as i32, verb as i32) == 19690720 {
@@ -57,4 +53,21 @@ pub fn solve_second() -> i32 {
         }
     }
     -1
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_first() {
+        let input = include_str!("input");
+        assert_eq!(solve_first(input), 7210630);
+    }
+
+    #[test]
+    fn test_second() {
+        let input = include_str!("input");
+        assert_eq!(solve_second(input), 3892);
+    }
 }

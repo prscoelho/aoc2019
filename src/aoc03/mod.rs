@@ -1,12 +1,9 @@
 use std::collections::HashMap;
 use std::collections::HashSet;
 
-fn read_wire() -> HashMap<(i32, i32), i32> {
+fn read_wire(input: &str) -> HashMap<(i32, i32), i32> {
     let mut result = HashMap::new();
-    let mut input = String::new();
-    if std::io::stdin().read_line(&mut input).is_err() {
-        return result;
-    }
+
     let mut position = (0, 0);
     let mut steps = 0;
     for wire in input.split_terminator(|c| c == ',' || c == '\n') {
@@ -53,9 +50,10 @@ fn read_wire() -> HashMap<(i32, i32), i32> {
     result
 }
 
-pub fn solve_first() -> i32 {
-    let w1: HashSet<(i32, i32)> = read_wire().keys().copied().collect();
-    let w2: HashSet<(i32, i32)> = read_wire().keys().copied().collect();
+pub fn solve_first(input: &str) -> i32 {
+    let mut lines = input.lines();
+    let w1: HashSet<(i32, i32)> = read_wire(lines.next().unwrap()).keys().copied().collect();
+    let w2: HashSet<(i32, i32)> = read_wire(lines.next().unwrap()).keys().copied().collect();
     let mut result = i32::max_value();
     for position in w1.intersection(&w2) {
         let distance = position.0.abs() + position.1.abs();
@@ -66,9 +64,10 @@ pub fn solve_first() -> i32 {
     result
 }
 
-pub fn solve_second() -> i32 {
-    let map1 = read_wire();
-    let map2 = read_wire();
+pub fn solve_second(input: &str) -> i32 {
+    let mut lines = input.lines();
+    let map1 = read_wire(lines.next().unwrap());
+    let map2 = read_wire(lines.next().unwrap());
 
     let set1: HashSet<(i32, i32)> = map1.keys().copied().collect();
     let set2: HashSet<(i32, i32)> = map2.keys().copied().collect();
@@ -82,4 +81,21 @@ pub fn solve_second() -> i32 {
         }
     }
     min_steps
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_first() {
+        let input = include_str!("input");
+        assert_eq!(solve_first(input), 225);
+    }
+
+    #[test]
+    fn test_second() {
+        let input = include_str!("input");
+        assert_eq!(solve_second(input), 35194);
+    }
 }

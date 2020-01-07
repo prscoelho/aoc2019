@@ -1,11 +1,17 @@
-fn read_codes() -> Vec<i32> {
-    let mut input = String::new();
+fn read_codes(input: &str) -> Vec<i32> {
     let mut result = Vec::new();
-    if std::io::stdin().read_line(&mut input).is_err() {
-        return result;
-    }
-    for number_str in input.split(',') {
-        result.push(number_str.parse().unwrap())
+
+    for number_str in input.trim().split(',') {
+        match number_str.parse() {
+            Ok(num) => result.push(num),
+            Err(e) => {
+                println!(
+                    "Error parsing number, input was: {}, error was: {}",
+                    number_str, e
+                );
+                panic!();
+            }
+        }
     }
     result
 }
@@ -113,8 +119,13 @@ fn intcode_computer(mut memory: Vec<i32>) {
     }
 }
 
-pub fn solve_first() {
-    let mem = read_codes();
+pub fn solve_first(input: &str) {
+    let mem = read_codes(input);
+    intcode_computer(mem);
+}
+
+pub fn solve_second(input: &str) {
+    let mem = read_codes(input);
     intcode_computer(mem);
 }
 

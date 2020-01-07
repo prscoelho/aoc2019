@@ -229,38 +229,7 @@ mod test {
         let decoded = decode_op(code);
         assert_eq!(decoded, expected);
     }
-    /*
-    #[test]
-    fn test_load() {
-        let memory = vec![4,3,2,1,0];
-        let loaded_value = load_value(&memory, 4, 0);
-        assert_eq!(loaded_value, 4);
 
-        let loaded_value = load_value(&memory, 4, 1);
-        assert_eq!(loaded_value, 0);
-    }
-
-    #[test]
-    fn test_save() {
-        let mut memory = vec![4,3,2,1,0];
-
-        save_value(&mut memory, 0,0,2);
-        assert_eq!(memory[4], 2);
-
-        save_value(&mut memory,0,1,3);
-        assert_eq!(memory[0], 3);
-    } */
-    /*
-    #[test]
-    fn test_instruction() {
-        let mut memory = vec![1101,100,-1,4,0];
-        let mut input = VecDeque::new();
-        let mut output = Vec::new();
-        let (op, incr) = run_instruction(&mut memory,0, &mut input, &mut output);
-        assert!(op == 1);
-        assert!(incr == 4);
-        assert!(memory[4] == 99);
-    } */
     #[test]
     fn test_feedback1() {
         let input =
@@ -275,5 +244,16 @@ mod test {
         let result = solve_second(input);
 
         assert_eq!(result, 18216);
+    }
+
+    #[test]
+    fn test_first() {
+        let input = include_str!("input");
+        assert_eq!(solve_first(input), 67023);
+    }
+    #[test]
+    fn test_second() {
+        let input = include_str!("input");
+        assert_eq!(solve_second(input), 7818398);
     }
 }

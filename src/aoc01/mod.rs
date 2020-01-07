@@ -1,12 +1,8 @@
-fn read_ints() -> Vec<i32> {
-    let mut input = String::new();
+fn read_ints(input: &str) -> Vec<i32> {
     let mut result = Vec::new();
-    while let Ok(n) = std::io::stdin().read_line(&mut input) {
-        if n == 0 {
-            break;
-        }
-        result.push(input.trim().parse::<i32>().unwrap());
-        input.clear();
+
+    for line in input.lines() {
+        result.push(line.trim().parse::<i32>().unwrap());
     }
     result
 }
@@ -15,8 +11,8 @@ fn fuel_required(mass: i32) -> i32 {
     mass / 3 - 2
 }
 
-pub fn solve_first() -> i32 {
-    let masses = read_ints();
+pub fn solve_first(input: &str) -> i32 {
+    let masses = read_ints(input);
     let mut result = 0;
     for mass in masses {
         result += fuel_required(mass);
@@ -24,8 +20,8 @@ pub fn solve_first() -> i32 {
     result
 }
 
-pub fn solve_second() -> i32 {
-    let masses = read_ints();
+pub fn solve_second(input: &str) -> i32 {
+    let masses = read_ints(input);
     let mut result = 0;
     for mass in masses {
         let mut required = fuel_required(mass);
@@ -39,4 +35,21 @@ pub fn solve_second() -> i32 {
         }
     }
     result
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_first() {
+        let input = include_str!("input");
+        assert_eq!(solve_first(input), 3315383);
+    }
+
+    #[test]
+    fn test_second() {
+        let input = include_str!("input");
+        assert_eq!(solve_second(input), 4970206);
+    }
 }

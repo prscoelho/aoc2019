@@ -82,18 +82,20 @@ mod test {
 
     #[test]
     fn test_count() {
-        let input = r"COM)B
-B)C
-C)D
-D)E
-E)F
-B)G
-G)H
-D)I
-E)J
-J)K
-K)L";
+        let input = "COM)B\nB)C\nC)D\nD)E\nE)F\nB)G\nG)H\nD)I\nE)J\nJ)K\nK)L";
         let edges = read_orbit(input);
         assert_eq!(count_orbits(edges), 42);
+    }
+
+    #[test]
+    fn test_first() {
+        let input = include_str!("input");
+        assert_eq!(solve_first(input), 241064);
+    }
+
+    #[test]
+    fn test_second() {
+        let input = include_str!("input");
+        assert_eq!(solve_second(input), 418);
     }
 }

@@ -78,6 +78,7 @@ impl Asteroids {
         list.sort_by(|a, b| {
             // sort by reverse angle (as we want to process angles in a clockwise order)
             // then magnitude if same angle
+            // partial_cmp is safe here as atan2 can't return nan/infinity
             a.0.partial_cmp(&b.0).unwrap().reverse().then(a.1.cmp(&b.1))
         });
 
