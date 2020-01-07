@@ -113,16 +113,7 @@ fn read_codes(input: &str) -> Vec<i64> {
     let mut result = Vec::new();
 
     for number_str in input.trim().split(',') {
-        match number_str.parse() {
-            Ok(num) => result.push(num),
-            Err(e) => {
-                println!(
-                    "Error parsing number, input was: {}, error was: {}",
-                    number_str, e
-                );
-                panic!();
-            }
-        }
+        result.push(number_str.parse().unwrap());
     }
     result
 }
