@@ -71,6 +71,7 @@ struct PaintingRobot {
     board: BTreeMap<Coordinate, i64>,
     position: Coordinate,
     direction: Direction,
+    paint_next: bool,
 }
 
 impl PaintingRobot {
@@ -79,6 +80,7 @@ impl PaintingRobot {
             board: BTreeMap::new(),
             position: Coordinate::new(0, 0),
             direction: Direction::Up,
+            paint_next: true,
         }
     }
 
@@ -128,15 +130,18 @@ fn decode_op(code: i64) -> (ParameterMode, ParameterMode, ParameterMode, i64) {
     (a, b, c, de)
 }
 
-struct Intcode<I, O>
+trait Bus {
+    fn input(&self) -> i64;
+    fn output(&mut self, v: i64);
+}
+
+struct Intcode<T>
 where
-    I: Fn() -> i64,
-    O: FnMut(i64),
+    T: Bus,
 {
     memory: Vec<i64>,
     ptr: usize,
-    input: I,
-    output: O,
+    bus: T,
     relative: i64,
 }
 
@@ -157,17 +162,15 @@ impl ParameterMode {
     }
 }
 
-impl<I, O> Intcode<I, O>
+impl<T> Intcode<T>
 where
-    I: Fn() -> i64,
-    O: FnMut(i64),
+    T: Bus,
 {
-    fn new(memory: Vec<i64>, input: I, output: O) -> Self {
+    fn new(memory: Vec<i64>, bus: T) -> Self {
         Intcode {
             memory,
             ptr: 0,
-            input,
-            output,
+            bus,
             relative: 0,
         }
     }
@@ -234,13 +237,13 @@ where
                 pointer + 4
             }
             3 => {
-                let input_value = (self.input)();
+                let input_value = self.bus.input();
                 self.save_value(pointer + 1, arg1_mode, input_value);
                 pointer + 2
             }
             4 => {
                 let v = self.load_value(pointer + 1, arg1_mode);
-                (self.output)(v);
+                self.bus.output(v);
                 pointer + 2
             }
             5 => {
@@ -298,39 +301,26 @@ where
     }
 }
 
-use std::sync::Mutex;
-
-// returns a set of painted white coordinates
-fn run_robot(memory: Vec<i64>) -> BTreeMap<Coordinate, i64> {
-    let robot = Mutex::new(PaintingRobot::new());
-
-    let input_fn = || robot.lock().unwrap().detect();
-
-    let mut paint_next = true;
-    let output_fn = |v| {
-        if v != 1 && v != 0 {
-            panic!("Unexpected output value.");
-        }
-        if paint_next {
-            robot.lock().unwrap().paint(v);
+impl Bus for PaintingRobot {
+    fn input(&self) -> i64 {
+        self.detect()
+    }
+    fn output(&mut self, v: i64) {
+        if self.paint_next {
+            self.paint(v);
         } else {
-            robot.lock().unwrap().rotate_walk(v);
+            self.rotate_walk(v);
         }
-        paint_next = !paint_next;
-    };
-
-    let mut intcode = Intcode::new(memory, input_fn, output_fn);
-
-    intcode.run();
-    let unlocked = robot.lock().unwrap();
-    unlocked.board.clone()
+        self.paint_next = !self.paint_next;
+    }
 }
 
 pub fn solve_first(input: &str) -> usize {
     let memory = read_codes(input);
-    let painted = run_robot(memory);
-
-    painted.len()
+    let robot = PaintingRobot::new();
+    let mut intcode = Intcode::new(memory, robot);
+    intcode.run();
+    intcode.bus.board.len()
 }
 
 #[cfg(test)]
