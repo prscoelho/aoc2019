@@ -333,7 +333,7 @@ pub fn solve_first(input: &str) -> usize {
     let robot = PaintingRobot::new();
     let mut intcode = Intcode::new(memory, robot);
     intcode.run();
-    to_image(&intcode.bus.board, "first.png");
+    //to_image(&intcode.bus.board, "first.png");
     intcode.bus.board.len()
 }
 
