@@ -47,6 +47,11 @@ enum Direction {
     Up,
     Down,
 }
+#[derive(Clone, Copy)]
+enum Color {
+    Black,
+    White,
+}
 
 impl Direction {
     fn rotate_left(&self) -> Direction {
@@ -68,7 +73,7 @@ impl Direction {
 }
 
 struct PaintingRobot {
-    board: BTreeMap<Coordinate, i64>,
+    board: BTreeMap<Coordinate, Color>,
     position: Coordinate,
     direction: Direction,
     paint_next: bool,
@@ -84,16 +89,16 @@ impl PaintingRobot {
         }
     }
 
-    fn detect(&self) -> i64 {
+    fn detect(&self) -> Color {
         if let Some(v) = self.board.get(&self.position) {
             *v
         } else {
-            0
+            Color::Black
         }
     }
 
-    fn paint(&mut self, value: i64) {
-        self.board.insert(self.position, value);
+    fn paint(&mut self, color: Color) {
+        self.board.insert(self.position, color);
     }
 
     fn rotate_walk(&mut self, value: i64) {
@@ -303,11 +308,19 @@ where
 
 impl Bus for PaintingRobot {
     fn input(&self) -> i64 {
-        self.detect()
+        match self.detect() {
+            Color::Black => 0,
+            Color::White => 1,
+        }
     }
     fn output(&mut self, v: i64) {
         if self.paint_next {
-            self.paint(v);
+            let color = match v {
+                0 => Color::Black,
+                1 => Color::White,
+                _ => panic!("Attempt to paint with unexpected value: {}", v),
+            };
+            self.paint(color);
         } else {
             self.rotate_walk(v);
         }
@@ -343,25 +356,25 @@ mod test {
         let mut robot = PaintingRobot::new();
 
         // paint 0,0
-        robot.paint(0);
+        robot.paint(Color::Black);
         assert_eq!(robot.board.len(), 1);
         robot.rotate_walk(0);
 
         // paint -1,0
-        robot.paint(1);
+        robot.paint(Color::White);
         robot.rotate_walk(0);
 
         // paint -1, -1
-        robot.paint(0);
+        robot.paint(Color::Black);
         robot.rotate_walk(0);
 
         // paint 0, -1
-        robot.paint(1);
+        robot.paint(Color::White);
         robot.rotate_walk(0);
         assert_eq!(robot.board.len(), 4);
 
         // repaint 0,0
-        robot.paint(1);
+        robot.paint(Color::White);
         assert_eq!(robot.board.len(), 4);
     }
 
