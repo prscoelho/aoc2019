@@ -336,6 +336,54 @@ pub fn solve_first(input: &str) -> usize {
     intcode.bus.board.len()
 }
 
+// doesn't output anything, but creates an image with the result
+pub fn solve_second(input: &str) {
+    let memory = read_codes(input);
+    let mut robot = PaintingRobot::new();
+    robot.paint(Color::White);
+    let mut intcode = Intcode::new(memory, robot);
+    intcode.run();
+
+    to_image(&intcode.bus.board, "identifier.png");
+}
+
+fn to_image(tree: &BTreeMap<Coordinate, Color>, name: &str) {
+    let mut top_left = Coordinate::new(0, 0);
+    let mut bottom_right = Coordinate::new(0, 0);
+
+    for coord in tree.keys() {
+        top_left.x = i32::min(top_left.x, coord.x);
+        top_left.y = i32::max(top_left.y, coord.y);
+
+        bottom_right.x = i32::max(bottom_right.x, coord.x);
+        bottom_right.y = i32::min(bottom_right.y, coord.y);
+    }
+
+    let width = (bottom_right.x - top_left.x + 1) as u32;
+    let height = (top_left.y - bottom_right.y + 1) as u32;
+
+    let mut img_buff = image::ImageBuffer::new(width, height);
+
+    let black = image::Rgb([0, 0, 0]);
+    let white = image::Rgb([255, 255, 255]);
+
+    for (coord, color) in tree {
+        let pixel = match color {
+            Color::Black => black,
+            Color::White => white,
+        };
+
+        // in my case, the robot starts at 0,0 and paints down and to the right
+        // other inputs might paint in other directions.
+        let x = coord.x as u32;
+        let y = coord.y.abs() as u32;
+
+        img_buff.put_pixel(x, y, pixel);
+    }
+
+    img_buff.save(name).unwrap();
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
