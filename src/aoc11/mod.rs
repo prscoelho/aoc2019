@@ -32,10 +32,10 @@ impl Coordinate {
                 self.x += 1;
             }
             Direction::Up => {
-                self.y += 1;
+                self.y -= 1;
             }
             Direction::Down => {
-                self.y -= 1;
+                self.y += 1;
             }
         }
     }
@@ -333,6 +333,7 @@ pub fn solve_first(input: &str) -> usize {
     let robot = PaintingRobot::new();
     let mut intcode = Intcode::new(memory, robot);
     intcode.run();
+    to_image(&intcode.bus.board, "first.png");
     intcode.bus.board.len()
 }
 
@@ -344,7 +345,7 @@ pub fn solve_second(input: &str) {
     let mut intcode = Intcode::new(memory, robot);
     intcode.run();
 
-    to_image(&intcode.bus.board, "identifier.png");
+    to_image(&intcode.bus.board, "second.png");
 }
 
 fn to_image(tree: &BTreeMap<Coordinate, Color>, name: &str) {
@@ -353,14 +354,14 @@ fn to_image(tree: &BTreeMap<Coordinate, Color>, name: &str) {
 
     for coord in tree.keys() {
         top_left.x = i32::min(top_left.x, coord.x);
-        top_left.y = i32::max(top_left.y, coord.y);
+        top_left.y = i32::min(top_left.y, coord.y);
 
         bottom_right.x = i32::max(bottom_right.x, coord.x);
-        bottom_right.y = i32::min(bottom_right.y, coord.y);
+        bottom_right.y = i32::max(bottom_right.y, coord.y);
     }
 
     let width = (bottom_right.x - top_left.x + 1) as u32;
-    let height = (top_left.y - bottom_right.y + 1) as u32;
+    let height = (bottom_right.y - top_left.y + 1) as u32;
 
     let mut img_buff = image::ImageBuffer::new(width, height);
 
@@ -373,10 +374,8 @@ fn to_image(tree: &BTreeMap<Coordinate, Color>, name: &str) {
             Color::White => white,
         };
 
-        // in my case, the robot starts at 0,0 and paints down and to the right
-        // other inputs might paint in other directions.
-        let x = coord.x as u32;
-        let y = coord.y.abs() as u32;
+        let x = (coord.x - top_left.x) as u32;
+        let y = (coord.y - top_left.y) as u32;
 
         img_buff.put_pixel(x, y, pixel);
     }

@@ -22,7 +22,7 @@ fn main() -> std::io::Result<()> {
     let mut file = File::open(&args[1])?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
-    aoc11::solve_second(&contents);
+    aoc11::solve_first(&contents);
     //println!("{}", );
 
     Ok(())
