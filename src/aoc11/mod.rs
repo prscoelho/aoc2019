@@ -395,7 +395,7 @@ mod test {
         assert_eq!(robot.position, Coordinate::new(-1, 0));
         // rotate right and walk
         robot.rotate_walk(1);
-        assert_eq!(robot.position, Coordinate::new(-1, 1));
+        assert_eq!(robot.position, Coordinate::new(-1, -1));
     }
 
     #[test]
