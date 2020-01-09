@@ -111,7 +111,6 @@ fn velocity_diff(positions: &[i32]) -> Vec<i32> {
 
 fn find_steps_axis(mut positions: Vec<i32>) -> u64 {
     let mut velocities = vec![0; positions.len()];
-    let positions_end = positions.clone();
     let velocities_end = velocities.clone();
 
     let mut steps = 0;
@@ -130,11 +129,11 @@ fn find_steps_axis(mut positions: Vec<i32>) -> u64 {
 
         steps += 1;
 
-        if positions == positions_end && velocities == velocities_end {
+        if velocities == velocities_end {
             break;
         }
     }
-    steps
+    steps * 2
 }
 
 // From https://doc.rust-lang.org/std/ops/trait.Div.html
