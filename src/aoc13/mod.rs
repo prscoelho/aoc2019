@@ -284,13 +284,13 @@ pub fn solve_first(input: &str) -> usize {
         .count()
 }
 
-pub fn solve_second(input: &str) -> usize {
+pub fn solve_second(input: &str) -> i64 {
     let mut memory = read_codes(input);
     memory[0] = 2;
     let arcade = ArcadeCabinet::new();
     let mut intcode = Intcode::new(memory, arcade);
     intcode.run();
-    intcode.bus.score as usize
+    intcode.bus.score
 }
 
 #[cfg(test)]
