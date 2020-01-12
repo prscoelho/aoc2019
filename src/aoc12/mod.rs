@@ -69,7 +69,6 @@ fn read_moons(input: &str) -> Vec<Moon> {
 fn step(moons: &mut Vec<Moon>) {
     for i in 0..moons.len() {
         for j in i + 1..moons.len() {
-            // copying moons to appease the borrow checker
             let m1 = moons[i];
             let m2 = moons[j];
             moons[i].apply_gravity(m2);
@@ -116,16 +115,12 @@ fn find_steps_axis(mut positions: Vec<i32>) -> u64 {
     let mut steps = 0;
     loop {
         let velocity_change = velocity_diff(&positions);
-        velocities = velocities
-            .iter()
-            .zip(velocity_change)
-            .map(|(v, diff)| v + diff)
-            .collect();
-        positions = positions
-            .iter()
-            .zip(velocities.iter())
-            .map(|(p, v)| p + v)
-            .collect();
+        for (v, change) in velocities.iter_mut().zip(velocity_change) {
+            *v += change;
+        }
+        for (p, v) in positions.iter_mut().zip(velocities.iter()) {
+            *p += v;
+        }
 
         steps += 1;
 
