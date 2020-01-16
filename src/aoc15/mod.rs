@@ -209,18 +209,16 @@ where
     None
 }
 
+// doesn't include start position in path
 fn reconstruct_path(
     came_from: HashMap<Coordinate, Coordinate>,
     mut position: Coordinate,
 ) -> VecDeque<Coordinate> {
     let mut total_path = VecDeque::new();
-    total_path.push_back(position);
     while let Some(&current) = came_from.get(&position) {
-        total_path.push_front(current);
+        total_path.push_front(position);
         position = current;
     }
-    // don't include starting position
-    total_path.pop_front();
     total_path
 }
 
