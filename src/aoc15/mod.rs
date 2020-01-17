@@ -114,9 +114,13 @@ impl RepairDroid {
     }
 
     fn goal(&self) -> Option<Coordinate> {
-        self.known_tiles
-            .iter()
-            .find_map(|(&k, v)| if let Tile::Goal = v { Some(k) } else { None })
+        self.known_tiles.iter().find_map(|(&coord, tile)| {
+            if tile == &Tile::Goal {
+                Some(coord)
+            } else {
+                None
+            }
+        })
     }
 
     fn move_result(&mut self, tile: Tile) {
@@ -258,7 +262,7 @@ fn bfs_depth(tiles: &BTreeMap<Coordinate, Tile>, start: Coordinate) -> usize {
                 let neighbor = current.movement(dir);
                 if !visited.contains(&neighbor) {
                     visited.insert(neighbor);
-                    if let Some(Tile::Empty) = tiles.get(&neighbor) {
+                    if tiles.get(&neighbor) == Some(&Tile::Empty) {
                         next_depth.push_back(neighbor);
                     }
                 }
