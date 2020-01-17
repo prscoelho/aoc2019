@@ -133,13 +133,11 @@ impl RepairDroid {
     }
 
     fn plan(&mut self) {
-        if let Some(towards) =
-            // search for first unknown
-            bfs(&self.known_tiles, self.position, |_, tile_option| {
-                tile_option == None
-            })
-        {
-            self.planned_path = towards;
+        // search for first unknown
+        if let Some(path) = bfs(&self.known_tiles, self.position, |_, tile_option| {
+            tile_option == None
+        }) {
+            self.planned_path = path;
         } else {
             self.finished_exploring = true;
         }
@@ -154,12 +152,10 @@ impl RepairDroid {
 
     fn path_to_goal(&self) -> Option<VecDeque<Coordinate>> {
         let start = Coordinate::new(0, 0);
-        if let Some(goal) = self.goal() {
-            // search for coord == goal
-            bfs(&self.known_tiles, start, |coord, _| coord == goal)
-        } else {
-            None
-        }
+        // search for goal tile
+        bfs(&self.known_tiles, start, |_, tile_option| {
+            tile_option == Some(&Tile::Goal)
+        })
     }
 }
 
