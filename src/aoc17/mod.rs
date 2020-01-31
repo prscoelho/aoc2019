@@ -41,7 +41,7 @@ impl Coordinate {
 
 // maps a board
 struct AsciiBot {
-    next: Coordinate,
+    next_coord: Coordinate,
     board: BTreeSet<Coordinate>,
     start: Coordinate,
     start_dir: Direction,
@@ -102,7 +102,7 @@ impl Board {
 impl AsciiBot {
     fn new() -> Self {
         AsciiBot {
-            next: Coordinate::new(0, 0),
+            next_coord: Coordinate::new(0, 0),
             board: BTreeSet::new(),
             start: Coordinate::new(0, 0),
             start_dir: Direction::Right,
@@ -110,24 +110,24 @@ impl AsciiBot {
         }
     }
 
-    fn next(&mut self, value: i64) {
+    fn next_input(&mut self, value: i64) {
         let value_char = std::char::from_u32(value as u32).unwrap();
         self.s.push(value_char);
         match value_char {
             '\n' => {
-                self.next.next_newline();
+                self.next_coord.next_newline();
             }
             '.' => {
                 // empty
-                self.next.next();
+                self.next_coord.next();
             }
             _ => {
                 // '>' | '<' | '^' | 'v' | '#'
-                self.board.insert(self.next);
+                self.board.insert(self.next_coord);
                 if value_char != '#' {
-                    self.start = self.next;
+                    self.start = self.next_coord;
                 }
-                self.next.next();
+                self.next_coord.next();
             }
         }
 
@@ -156,7 +156,7 @@ fn read_ascii(input: &str) -> Board {
     let mut ascii = AsciiBot::new();
     intcode.run_until_output();
     while !intcode.finished {
-        ascii.next(intcode.output.pop_front().unwrap());
+        ascii.next_input(intcode.output.pop_front().unwrap());
         intcode.run_until_output();
     }
     ascii.get_board()
@@ -191,9 +191,9 @@ fn plan_path(board: Board) -> Vec<Movement> {
             current_pos = forward_pos;
         } else {
             let right_dir = current_dir.turn_right();
-            let left_dir = current_dir.turn_left();
-
             let right_pos = current_pos.move_direction(&right_dir);
+
+            let left_dir = current_dir.turn_left();
             let left_pos = current_pos.move_direction(&left_dir);
 
             // move right first if possible, move left only if moving right isn't possible
@@ -218,7 +218,7 @@ fn plan_path(board: Board) -> Vec<Movement> {
     result
 }
 
-fn compact_path(mut path: &str) -> String {
+fn compact_string(mut path: &str) -> String {
     let mut result = String::new();
 
     while !path.is_empty() {
@@ -226,10 +226,11 @@ fn compact_path(mut path: &str) -> String {
         path = next_path;
         result.push_str(&parsed);
     }
+    // remove last ','
     result.pop();
     result
 }
-
+// returns str left to parse, result of parsed str
 fn parse_until_turn(path: &str) -> (&str, String) {
     let mut count = 0;
     let mut length = 0;
@@ -310,7 +311,7 @@ pub fn solve_second(input: &str) -> i64 {
 fn board_from_string(input: &str) -> Board {
     let mut ascii = AsciiBot::new();
     for c in input.chars() {
-        ascii.next(c as i64);
+        ascii.next_input(c as i64);
     }
     ascii.get_board()
 }
@@ -515,7 +516,7 @@ mod test {
     fn compact() {
         let input = "FFFFFR";
         let expected = "5,R";
-        assert_eq!(compact_path(input), expected);
+        assert_eq!(compact_string(input), expected);
     }
 
     #[test]
