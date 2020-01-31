@@ -19,6 +19,7 @@ mod aoc13;
 mod aoc14;
 mod aoc15;
 mod aoc16;
+mod aoc17;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
@@ -27,7 +28,7 @@ fn main() -> std::io::Result<()> {
     let mut file = File::open(&args[1])?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
-    println!("{}", aoc16::solve_second(&contents));
+    println!("{}", aoc17::solve_second(&contents));
 
     Ok(())
 }
