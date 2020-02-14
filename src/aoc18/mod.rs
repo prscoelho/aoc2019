@@ -175,7 +175,7 @@ fn search_keys(
 ) -> Vec<(char, usize)> {
     // dist[node] = current shortest distance from `start` to `node`
     let mut dist = HashMap::new();
-    for key in graph.keys() {
+    for &key in graph.keys() {
         dist.insert(key, usize::max_value());
     }
 
@@ -212,7 +212,7 @@ fn search_keys(
             };
 
             if next.cost < dist[&next_node] {
-                *dist.get_mut(&next_node).unwrap() = next.cost;
+                dist.insert(next_node, next.cost);
                 heap.push(next);
             }
         }
@@ -237,20 +237,27 @@ fn four_robots(grid: &mut HashMap<Coordinate, Tile>) {
         .map(|(k, _)| k.clone())
         .unwrap();
 
-    grid.entry(robot_coord)
-        .and_modify(|tile| *tile = Tile::Wall);
-
-    for neighbour in &robot_coord.neighbours() {
-        grid.entry(*neighbour).and_modify(|tile| *tile = Tile::Wall);
+    grid.insert(robot_coord, Tile::Wall);
+    for &neighbour in &robot_coord.neighbours() {
+        grid.insert(neighbour, Tile::Wall);
     }
-    grid.entry(Coordinate(robot_coord.0 - 1, robot_coord.1 - 1))
-        .and_modify(|tile| *tile = Tile::Node('@'));
-    grid.entry(Coordinate(robot_coord.0 - 1, robot_coord.1 + 1))
-        .and_modify(|tile| *tile = Tile::Node('='));
-    grid.entry(Coordinate(robot_coord.0 + 1, robot_coord.1 + 1))
-        .and_modify(|tile| *tile = Tile::Node('%'));
-    grid.entry(Coordinate(robot_coord.0 + 1, robot_coord.1 - 1))
-        .and_modify(|tile| *tile = Tile::Node('$'));
+    grid.insert(
+        Coordinate(robot_coord.0 - 1, robot_coord.1 - 1),
+        Tile::Node('@'),
+    );
+    grid.insert(
+        Coordinate(robot_coord.0 - 1, robot_coord.1 + 1),
+        Tile::Node('='),
+    );
+
+    grid.insert(
+        Coordinate(robot_coord.0 + 1, robot_coord.1 + 1),
+        Tile::Node('%'),
+    );
+    grid.insert(
+        Coordinate(robot_coord.0 + 1, robot_coord.1 - 1),
+        Tile::Node('$'),
+    );
 }
 
 fn search_four(graph: HashMap<char, HashMap<char, usize>>) -> usize {
