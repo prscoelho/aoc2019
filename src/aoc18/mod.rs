@@ -186,12 +186,12 @@ fn search_keys(
         cost: 0,
         current: start,
     });
-
-    let mut result = Vec::new();
+    // keep track of which new keys we can reach
+    let mut reach = HashSet::new();
 
     while let Some(DijkstraState { cost, current }) = heap.pop() {
         if current.is_lowercase() && !keys.contains(&current) {
-            result.push((current, cost));
+            reach.insert(current);
             continue;
         }
 
@@ -217,8 +217,8 @@ fn search_keys(
             }
         }
     }
-
-    result
+    // return a tuple of (new keys, cost to reach)
+    reach.into_iter().map(|node| (node, dist[&node])).collect()
 }
 
 pub fn solve_first(input: &str) -> usize {
