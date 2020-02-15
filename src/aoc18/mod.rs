@@ -308,6 +308,12 @@ fn search_four(graph: HashMap<char, HashMap<char, usize>>) -> usize {
             return current.steps;
         }
 
+        if let Some(&best_steps) = distances.get(&(current.robots, current.keys.clone())) {
+            if current.steps > best_steps {
+                continue;
+            }
+        }
+
         for (robot_number, &robot_location) in current.robots.iter().enumerate() {
             let cache_key = (robot_location, current.keys.clone());
 
