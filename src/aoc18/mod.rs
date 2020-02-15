@@ -1,5 +1,5 @@
 use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
 struct Coordinate(i32, i32);
@@ -87,7 +87,7 @@ fn reachable_from(grid: &HashMap<Coordinate, Tile>, coord: Coordinate) -> HashMa
 struct State {
     steps: usize,
     node: char,
-    keys: HashSet<char>,
+    keys: BTreeSet<char>,
 }
 
 impl Ord for State {
@@ -108,35 +108,57 @@ impl PartialOrd for State {
 fn search(graph: HashMap<char, HashMap<char, usize>>, start: char) -> usize {
     let mut priority_queue = BinaryHeap::new();
     let key_count = graph.iter().filter(|(k, _)| k.is_lowercase()).count();
+
+    // keep track of best cost at (robot_position, keys collected)
+    let mut distances: HashMap<(char, BTreeSet<char>), usize> = HashMap::new();
+    distances.insert((start, BTreeSet::new()), 0);
+
     let start = State {
         steps: 0,
         node: start,
-        keys: HashSet::new(),
+        keys: BTreeSet::new(),
     };
 
     priority_queue.push(start);
+
+    // search keys cache, avoid recomputing search keys for the same (position, keys collected)
+    let mut cache: HashMap<(char, BTreeSet<char>), Vec<(char, usize)>> = HashMap::new();
 
     while let Some(current) = priority_queue.pop() {
         if current.keys.len() == key_count {
             return current.steps;
         }
 
-        let keys = search_keys(&graph, &current.keys, current.node);
-        for (next_node, cost) in keys {
+        if let Some(&best_steps) = distances.get(&(current.node, current.keys.clone())) {
+            if current.steps > best_steps {
+                continue;
+            }
+        }
+
+        let cache_key = (current.node, current.keys.clone());
+
+        let cached_entry = cache
+            .entry(cache_key)
+            .or_insert_with(|| search_keys(&graph, &current.keys, current.node));
+
+        for &(next_node, cost) in cached_entry.iter() {
             let mut next_keys = current.keys.clone();
             next_keys.insert(next_node);
+            let next_steps = current.steps + cost;
 
-            let next_state = State {
-                steps: current.steps + cost,
-                node: next_node,
-                keys: next_keys,
-            };
-            // only add if there's no equal/better state already in queue
-            if !priority_queue.iter().any(|state| {
-                next_state.node == state.node
-                    && next_state.steps >= state.steps
-                    && next_state.keys == state.keys
-            }) {
+            let distances_entry = distances
+                .entry((next_node, next_keys.clone()))
+                .or_insert(usize::max_value());
+
+            if next_steps < *distances_entry {
+                *distances_entry = next_steps;
+
+                let next_state = State {
+                    steps: current.steps + cost,
+                    node: next_node,
+                    keys: next_keys,
+                };
+
                 priority_queue.push(next_state);
             }
         }
@@ -170,7 +192,7 @@ impl PartialOrd for DijkstraState {
 // dijkstra search for reachable new keys from start node
 fn search_keys(
     graph: &HashMap<char, HashMap<char, usize>>,
-    keys: &HashSet<char>,
+    keys: &BTreeSet<char>,
     start: char,
 ) -> Vec<(char, usize)> {
     // dist[node] = current shortest distance from `start` to `node`
@@ -263,40 +285,57 @@ fn four_robots(grid: &mut HashMap<Coordinate, Tile>) {
 fn search_four(graph: HashMap<char, HashMap<char, usize>>) -> usize {
     let mut priority_queue = BinaryHeap::new();
     let key_count = graph.iter().filter(|(k, _)| k.is_lowercase()).count();
+
+    // keep track of best cost at (robot_positions, keys collected)
+    let mut distances: HashMap<([char; 4], BTreeSet<char>), usize> = HashMap::new();
+    let robots = ['@', '=', '%', '$'];
+
+    distances.insert((robots.clone(), BTreeSet::new()), 0);
+
     let start = FourState {
         steps: 0,
-        robots: ['@', '=', '%', '$'],
-        keys: HashSet::new(),
+        robots: robots,
+        keys: BTreeSet::new(),
     };
 
     priority_queue.push(start);
+
+    // search keys cache, avoid recomputing search keys for the same (position, keys collected)
+    let mut cache: HashMap<(char, BTreeSet<char>), Vec<(char, usize)>> = HashMap::new();
 
     while let Some(current) = priority_queue.pop() {
         if current.keys.len() == key_count {
             return current.steps;
         }
 
-        for (robot_number, robot_location) in current.robots.iter().enumerate() {
-            let keys = search_keys(&graph, &current.keys, *robot_location);
+        for (robot_number, &robot_location) in current.robots.iter().enumerate() {
+            let cache_key = (robot_location, current.keys.clone());
 
-            for (next_node, cost) in keys {
+            let cached_entry = cache
+                .entry(cache_key)
+                .or_insert_with(|| search_keys(&graph, &current.keys, robot_location));
+
+            for &(next_node, cost) in cached_entry.iter() {
                 let mut next_keys = current.keys.clone();
                 next_keys.insert(next_node);
 
                 let mut next_robots = current.robots.clone();
                 next_robots[robot_number] = next_node;
 
-                let next_state = FourState {
-                    steps: current.steps + cost,
-                    robots: next_robots,
-                    keys: next_keys,
-                };
-                // only add if there's no equal/better state already in queue
-                if !priority_queue.iter().any(|state| {
-                    next_state.robots == state.robots
-                        && next_state.steps >= state.steps
-                        && next_state.keys == state.keys
-                }) {
+                let next_steps = current.steps + cost;
+
+                let distances_entry = distances
+                    .entry((next_robots.clone(), next_keys.clone()))
+                    .or_insert(usize::max_value());
+
+                if next_steps < *distances_entry {
+                    *distances_entry = next_steps;
+                    let next_state = FourState {
+                        steps: next_steps,
+                        robots: next_robots,
+                        keys: next_keys,
+                    };
+
                     priority_queue.push(next_state);
                 }
             }
@@ -310,7 +349,7 @@ fn search_four(graph: HashMap<char, HashMap<char, usize>>) -> usize {
 struct FourState {
     steps: usize,
     robots: [char; 4],
-    keys: HashSet<char>,
+    keys: BTreeSet<char>,
 }
 
 impl Ord for FourState {
@@ -379,10 +418,10 @@ mod test {
     fn next_keys() {
         let input = include_str!("example3");
         let graph = graph(&parse_grid(input));
-        let keys = HashSet::new();
-        let expected = vec![('a', 2), ('b', 22)];
-
-        assert_eq!(search_keys(&graph, &keys, '@'), expected);
+        let keys = BTreeSet::new();
+        let result = search_keys(&graph, &keys, '@');
+        assert!(result.contains(&('a', 2)));
+        assert!(result.contains(&('b', 22)));
     }
 
     #[test]
