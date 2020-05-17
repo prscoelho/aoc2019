@@ -22,15 +22,20 @@ mod aoc16;
 mod aoc17;
 mod aoc18;
 mod aoc19;
+mod aoc20;
 
 fn main() -> std::io::Result<()> {
     let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        println!("Input file missing");
+        return Ok(());
+    }
 
     println!("{}", &args[1]);
     let mut file = File::open(&args[1])?;
     let mut contents = String::new();
     file.read_to_string(&mut contents)?;
-    println!("{}", aoc19::solve_second(&contents));
+    println!("{}", aoc20::solve_second(&contents));
 
     Ok(())
 }
