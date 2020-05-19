@@ -58,17 +58,6 @@ fn rev_card_cut(res: i128, size: i128, cut: i128) -> i128 {
     (res + cut + size) % size
 }
 
-fn gcd(x: i128, y: i128) -> i128 {
-    let mut x = x;
-    let mut y = y;
-    while y != 0 {
-        let t = y;
-        y = x % y;
-        x = t;
-    }
-    x
-}
-
 fn egcd(a: i128, b: i128) -> (i128, i128, i128) {
     if a == 0 {
         (b, 0, 1)
