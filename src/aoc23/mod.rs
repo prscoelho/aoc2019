@@ -141,7 +141,7 @@ mod test {
 
 // ------ INTCODE ---
 // input and output are crossbeam channels
-// timeouts for 100ms on no input with recv_timeout(100ms)
+// timeouts for 5ms on no input with recv_timeout(5ms)
 // and then continues with -1
 fn read_codes(input: &str) -> Vec<i64> {
     let mut result = Vec::new();
