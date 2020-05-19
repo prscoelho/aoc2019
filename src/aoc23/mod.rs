@@ -61,8 +61,8 @@ fn run_network_nat(network: Network) -> i64 {
                 last_active = Instant::now();
             }
         }
-        // if there's no activity for over 200ms, send nat packet
-        if last_active.elapsed() > Duration::from_millis(200) {
+        // if there's no activity, send nat packet
+        if last_active.elapsed() > Duration::from_millis(50) {
             if last_sent == nat_y {
                 return last_sent;
             }
@@ -266,8 +266,8 @@ impl Intcode {
                 pointer + 4
             }
             3 => {
-                // changed here, yield -1 when no input is given
-                let input_value = match self.input.recv_timeout(Duration::from_millis(100)) {
+                // wait for input, then continue with value -1
+                let input_value = match self.input.recv_timeout(Duration::from_millis(5)) {
                     Ok(value) => value,
                     _ => -1,
                 };
